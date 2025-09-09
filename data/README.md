@@ -18,8 +18,18 @@
 - `Q2_1` to `Q2_9`: Inattention questions (0-3 integer scale)
 - `label`: Classification (0=No ADHD, 1=Inattentive, 2=Hyperactive, 3=Severe)
 
-## How to Add Datasets
+## How to Use Datasets
 
+### Option 1: Automatic Download (Recommended)
+```bash
+# Install kagglehub
+pip install kagglehub
+
+# Run training with automatic download
+python train_kaggle_models.py
+```
+
+### Option 2: Manual Download
 1. Download datasets from Kaggle
 2. Place files in this `/data/` directory:
    ```
@@ -28,7 +38,7 @@
    ├── adhd_dataset.csv
    └── README.md
    ```
-3. Run training: `python train_real_models.py`
+3. Run training: `python train_kaggle_models.py`
 
 ## Fallback System
 
@@ -36,7 +46,21 @@ If datasets are not found, the system automatically uses synthetic data that mat
 
 ## Dataset Sources
 
-- **Dyslexia**: Search "dyslexia classification" on Kaggle
-- **ADHD**: Search "ADHD assessment questionnaire" on Kaggle
+- **Dyslexia**: `dhruvildave/dyslexia-classification` on Kaggle
+- **ADHD**: `arashnic/adhd-dataset` on Kaggle
+
+## Automatic Download
+
+The `train_kaggle_models.py` script uses kagglehub to automatically download datasets:
+
+```python
+import kagglehub
+
+# Download dyslexia dataset
+dyslexia_path = kagglehub.dataset_download("dhruvildave/dyslexia-classification")
+
+# Download ADHD dataset
+adhd_path = kagglehub.dataset_download("arashnic/adhd-dataset")
+```
 
 The training script will automatically detect and use real datasets when available, or fall back to synthetic data with identical structure.

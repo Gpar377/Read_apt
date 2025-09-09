@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: accessibility-reading-platform
+    env: python
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        value: sqlite:///./accessibility.db
+      - key: ENVIRONMENT
+        value: production

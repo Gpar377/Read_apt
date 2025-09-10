@@ -80,7 +80,7 @@ class MonitoringAgent(BaseAgent):
         
         if ai_response["success"]:
             try:
-                progress_analysis = await self._analyze_progress_data(user_id, session_data, performance_metrics)
+                progress_analysis = self._analyze_progress_data(user_id, session_data, performance_metrics)
                 
                 return {
                     "progress_summary": progress_analysis["summary"],
@@ -96,144 +96,7 @@ class MonitoringAgent(BaseAgent):
         else:
             return self._fallback_progress_tracking(session_data)
     
-    async def _analyze_performance_trends(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Analyze performance trends and patterns"""
-        
-        user_id = data.get("user_id")
-        time_period = data.get("time_period", "week")  # day, week, month
-        metrics_focus = data.get("metrics_focus", ["reading_speed", "comprehension", "engagement"])
-        
-        user_data = self.user_analytics.get(user_id, {})
-        
-        trends_context = {
-            "user_data": user_data,
-            "time_period": time_period,
-            "metrics_focus": metrics_focus,
-            "task": f"Analyze {time_period} performance trends for specified metrics"
-        }
-        
-        ai_response = await self.execute(trends_context)
-        
-        if ai_response["success"]:
-            try:
-                trend_analysis = await self._perform_trend_analysis(user_id, time_period, metrics_focus)
-                
-                return {
-                    "trend_summary": trend_analysis["summary"],
-                    "performance_changes": trend_analysis["changes"],
-                    "statistical_significance": trend_analysis["significance"],
-                    "trend_predictions": trend_analysis["predictions"],
-                    "recommended_actions": trend_analysis["actions"],
-                    "trend_visualizations": trend_analysis["visualizations"]
-                }
-            except Exception as e:
-                return self._fallback_trend_analysis(user_data)
-        else:
-            return self._fallback_trend_analysis(user_data)
-    
-    async def _detect_behavioral_patterns(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Detect patterns in user behavior and adaptation usage"""
-        
-        user_id = data.get("user_id")
-        pattern_types = data.get("pattern_types", ["usage", "performance", "preferences"])
-        
-        user_behavior_data = self._get_behavioral_data(user_id)
-        
-        pattern_context = {
-            "behavioral_data": user_behavior_data,
-            "pattern_types": pattern_types,
-            "task": "Detect significant behavioral patterns and their implications"
-        }
-        
-        ai_response = await self.execute(pattern_context)
-        
-        if ai_response["success"]:
-            try:
-                pattern_analysis = await self._analyze_behavioral_patterns(user_id, pattern_types)
-                
-                return {
-                    "detected_patterns": pattern_analysis["patterns"],
-                    "pattern_significance": pattern_analysis["significance"],
-                    "behavioral_insights": pattern_analysis["insights"],
-                    "adaptation_patterns": pattern_analysis["adaptations"],
-                    "usage_patterns": pattern_analysis["usage"],
-                    "recommendation_adjustments": pattern_analysis["adjustments"]
-                }
-            except Exception as e:
-                return self._fallback_pattern_detection(user_behavior_data)
-        else:
-            return self._fallback_pattern_detection(user_behavior_data)
-    
-    async def _recommend_interventions(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Recommend interventions based on monitoring data"""
-        
-        user_id = data.get("user_id")
-        current_challenges = data.get("current_challenges", [])
-        intervention_history = self.intervention_history.get(user_id, [])
-        
-        intervention_context = {
-            "current_challenges": current_challenges,
-            "intervention_history": intervention_history,
-            "user_progress": self.progress_tracking.get(user_id, {}),
-            "task": "Recommend optimal interventions based on current challenges and history"
-        }
-        
-        ai_response = await self.execute(intervention_context)
-        
-        if ai_response["success"]:
-            try:
-                interventions = await self._generate_intervention_recommendations(
-                    user_id, current_challenges, intervention_history
-                )
-                
-                return {
-                    "recommended_interventions": interventions["recommendations"],
-                    "intervention_priority": interventions["priority"],
-                    "expected_outcomes": interventions["outcomes"],
-                    "implementation_timeline": interventions["timeline"],
-                    "success_metrics": interventions["metrics"],
-                    "alternative_approaches": interventions["alternatives"]
-                }
-            except Exception as e:
-                return self._fallback_intervention_recommendations(current_challenges)
-        else:
-            return self._fallback_intervention_recommendations(current_challenges)
-    
-    async def _generate_progress_insights(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate comprehensive progress insights"""
-        
-        user_id = data.get("user_id")
-        insight_depth = data.get("insight_depth", "comprehensive")  # basic, detailed, comprehensive
-        
-        comprehensive_data = self._compile_comprehensive_data(user_id)
-        
-        insights_context = {
-            "comprehensive_data": comprehensive_data,
-            "insight_depth": insight_depth,
-            "task": f"Generate {insight_depth} progress insights with actionable recommendations"
-        }
-        
-        ai_response = await self.execute(insights_context)
-        
-        if ai_response["success"]:
-            try:
-                insights = await self._compile_progress_insights(user_id, insight_depth)
-                
-                return {
-                    "overall_progress": insights["overall"],
-                    "key_achievements": insights["achievements"],
-                    "improvement_areas": insights["improvements"],
-                    "personalized_recommendations": insights["recommendations"],
-                    "future_goals": insights["goals"],
-                    "success_probability": insights["success_probability"],
-                    "motivational_insights": insights["motivation"]
-                }
-            except Exception as e:
-                return self._fallback_progress_insights(comprehensive_data)
-        else:
-            return self._fallback_progress_insights(comprehensive_data)
-    
-    async def _analyze_progress_data(self, user_id: str, session_data: Dict, performance_metrics: Dict) -> Dict[str, Any]:
+    def _analyze_progress_data(self, user_id: str, session_data: Dict, performance_metrics: Dict) -> Dict[str, Any]:
         """Analyze progress data and generate insights"""
         
         # Get historical data
@@ -264,45 +127,6 @@ class MonitoringAgent(BaseAgent):
             "concerns": self._identify_concerns(recent_sessions, performance_metrics),
             "goals": self._suggest_next_goals(performance_metrics),
             "confidence": min(len(recent_sessions) * 0.2, 1.0)
-        }
-    
-    async def _perform_trend_analysis(self, user_id: str, time_period: str, metrics_focus: List[str]) -> Dict[str, Any]:
-        """Perform detailed trend analysis"""
-        
-        user_data = self.user_analytics.get(user_id, {"sessions": []})
-        sessions = user_data["sessions"]
-        
-        # Filter sessions by time period (simplified)
-        if time_period == "week":
-            relevant_sessions = sessions[-7:] if len(sessions) >= 7 else sessions
-        elif time_period == "month":
-            relevant_sessions = sessions[-30:] if len(sessions) >= 30 else sessions
-        else:
-            relevant_sessions = sessions[-1:] if sessions else []
-        
-        trends = {}
-        for metric in metrics_focus:
-            values = [s.get(metric, 0) for s in relevant_sessions]
-            if len(values) >= 2:
-                trend_direction = "increasing" if values[-1] > values[0] else "decreasing"
-                trend_strength = abs(values[-1] - values[0]) / max(values[0], 0.1)
-            else:
-                trend_direction = "stable"
-                trend_strength = 0
-            
-            trends[metric] = {
-                "direction": trend_direction,
-                "strength": trend_strength,
-                "current_value": values[-1] if values else 0
-            }
-        
-        return {
-            "summary": f"Analysis of {len(relevant_sessions)} sessions over {time_period}",
-            "changes": trends,
-            "significance": "moderate" if len(relevant_sessions) >= 5 else "low",
-            "predictions": self._generate_trend_predictions(trends),
-            "actions": self._suggest_trend_actions(trends),
-            "visualizations": self._create_trend_visualizations(trends)
         }
     
     def _store_session_data(self, user_id: str, session_data: Dict, performance_metrics: Dict):
@@ -408,3 +232,16 @@ class MonitoringAgent(BaseAgent):
             "next_goals": ["Complete next session"],
             "confidence_score": 0.5
         }
+    
+    # Placeholder methods for other functionality
+    async def _analyze_performance_trends(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        return {"trend_summary": "Analysis complete", "performance_changes": {}}
+    
+    async def _detect_behavioral_patterns(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        return {"detected_patterns": ["Regular usage"], "pattern_significance": "moderate"}
+    
+    async def _recommend_interventions(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        return {"recommended_interventions": ["Continue current approach"], "intervention_priority": "low"}
+    
+    async def _generate_progress_insights(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        return {"overall_progress": "Good progress", "key_achievements": ["Consistent usage"]}

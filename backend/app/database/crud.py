@@ -14,11 +14,13 @@ def get_user(db: Session, user_id: int):
 
 def update_user(db: Session, user_id: int, **kwargs):
     user = get_user(db, user_id)
-    for key, value in kwargs.items():
-        setattr(user, key, value)
-    db.commit()
-    db.refresh(user)
-    return user
+    if user:
+        for key, value in kwargs.items():
+            setattr(user, key, value)
+        db.commit()
+        db.refresh(user)
+        return user
+    return None
 
 def delete_user(db: Session, user_id: int):
     user = get_user(db, user_id)
@@ -46,8 +48,11 @@ def update_assessment(db: Session, assessment_id: int, **kwargs):
 
 def delete_assessment(db: Session, assessment_id: int):
     assessment = get_assessment(db, assessment_id)
-    db.delete(assessment)
-    db.commit()
+    if assessment:
+        db.delete(assessment)
+        db.commit()
+        return True
+    return False
 
 # --- Progress CRUD ---
 def create_progress(db: Session, user_id: int, metrics: dict):
@@ -62,13 +67,18 @@ def get_progress(db: Session, progress_id: int):
 
 def update_progress(db: Session, progress_id: int, **kwargs):
     progress = get_progress(db, progress_id)
-    for key, value in kwargs.items():
-        setattr(progress, key, value)
-    db.commit()
-    db.refresh(progress)
-    return progress
+    if progress:
+        for key, value in kwargs.items():
+            setattr(progress, key, value)
+        db.commit()
+        db.refresh(progress)
+        return progress
+    return None
 
 def delete_progress(db: Session, progress_id: int):
     progress = get_progress(db, progress_id)
-    db.delete(progress)
-    db.commit()
+    if progress:
+        db.delete(progress)
+        db.commit()
+        return True
+    return False

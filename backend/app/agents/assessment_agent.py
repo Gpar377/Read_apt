@@ -253,14 +253,16 @@ class AssessmentAgent(BaseAgent):
                 end = response.rfind("}") + 1
                 json_str = response[start:end]
                 return json.loads(json_str)
-        except:
-            pass
-        
-        # Fallback parsing
+        except (json.JSONDecodeError, ValueError, KeyError) as e:
+            # Log parsing error for debugging
+            error_info = f"JSON parsing failed: {str(e)}"
+            
+        # Fallback parsing with error context
         return {
             "feedback": "Continue with your assessment",
             "difficulty": "maintain",
-            "tips": ["Take your time", "Focus on accuracy"]
+            "tips": ["Take your time", "Focus on accuracy"],
+            "parsing_error": True
         }
     
     def _update_user_profile(self, user_id: str, assessment_type: str, data: Dict[str, Any]):

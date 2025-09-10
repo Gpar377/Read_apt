@@ -1,5 +1,6 @@
 import re
 from typing import Dict, Any
+import html
 
 class TextAdaptationService:
     
@@ -76,6 +77,8 @@ class TextAdaptationService:
     
     def highlight_dyslexic_letters(self, text: str) -> str:
         """Highlight commonly confused letters for dyslexic readers"""
+        # Escape HTML to prevent XSS
+        text = html.escape(text)
         dyslexic_pairs = ['b', 'd', 'p', 'q', 'm', 'w', 'n', 'u']
         for letter in dyslexic_pairs:
             text = text.replace(letter, f'<span class="dyslexic-highlight">{letter}</span>')
@@ -84,6 +87,8 @@ class TextAdaptationService:
     
     def highlight_every_third_word(self, text: str) -> str:
         """Highlight every third word for ADHD focus"""
+        # Escape HTML to prevent XSS
+        text = html.escape(text)
         words = text.split()
         for i in range(2, len(words), 3):  # Every 3rd word (0-indexed)
             words[i] = f'<span class="adhd-highlight">{words[i]}</span>'

@@ -217,14 +217,16 @@ class AgentOrchestrator:
         # Prepare agent-specific data
         agent_data = data.copy()
         
-        if agent_name == "assessment":
-            agent_data["type"] = action.replace("_test", "").replace("_questionnaire", "")
-        elif agent_name == "content":
-            agent_data["content_type"] = action.replace("_", "_")
-        elif agent_name == "personalization":
-            agent_data["action_type"] = action
-        elif agent_name == "monitoring":
-            agent_data["monitoring_type"] = action
+        # Map actions to agent-specific data formats
+        action_mappings = {
+            "assessment": lambda a: {"type": a.replace("_test", "").replace("_questionnaire", "")},
+            "content": lambda a: {"content_type": a.replace("_", "-")},
+            "personalization": lambda a: {"action_type": a},
+            "monitoring": lambda a: {"monitoring_type": a}
+        }
+        
+        if agent_name in action_mappings:
+            agent_data.update(action_mappings[agent_name](action))
         
         try:
             result = await agent.process(agent_data)
@@ -235,6 +237,9 @@ class AgentOrchestrator:
     async def _execute_agent_collaboration(self, agent_name: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """Execute agent in collaborative mode"""
         
+        if agent_name not in self.agent_registry:
+            return {"success": False, "error": f"Unknown agent: {agent_name}", "agent": agent_name}
+        
         agent = self.agent_registry[agent_name]
         
         # Add collaboration context
@@ -244,7 +249,11 @@ class AgentOrchestrator:
             "shared_context": data.get("collaborative_context", {})
         }
         
-        return await agent.process(collaboration_data)
+        try:
+            result = await agent.process(collaboration_data)
+            return {"success": True, "data": result, "agent": agent_name}
+        except Exception as e:
+            return {"success": False, "error": str(e), "agent": agent_name, "collaboration_failed": True}
     
     async def _handle_multi_agent_request(self, user_request: Dict[str, Any]) -> Dict[str, Any]:
         """Handle complex requests requiring multiple agents"""

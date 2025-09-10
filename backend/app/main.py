@@ -1,7 +1,14 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import dyslexia, adhd, adaptation, agentic_api, tts_simple
+from app.api import dyslexia, adhd, adaptation, agentic_api, tts_simple, user_profile
 from app.analytics import dashboard, export
+from app.auth import auth_routes
+from app.database.database import create_tables
+# from deployment.monitoring import comprehensive_health_check, metrics_middleware, get_metrics
+from fastapi.responses import PlainTextResponse
+
+# Create database tables
+create_tables()
 
 app = FastAPI(
     title="Accessibility Reading Platform - Agentic AI", 
@@ -22,6 +29,12 @@ app.include_router(dyslexia.router, prefix="/api/dyslexia", tags=["dyslexia"])
 app.include_router(adhd.router, prefix="/api/adhd", tags=["adhd"])
 app.include_router(adaptation.router, prefix="/api/adaptation", tags=["adaptation"])
 
+# Authentication routes
+app.include_router(auth_routes.router, prefix="/auth", tags=["authentication"])
+
+# User profile routes
+app.include_router(user_profile.router, prefix="/api/user", tags=["user-profile"])
+
 # Analytics routes
 app.include_router(dashboard.router)
 app.include_router(export.router)
@@ -35,6 +48,16 @@ app.include_router(tts_simple.router, prefix="/api/tts", tags=["text-to-speech"]
 @app.get("/")
 async def root():
     return {"message": "Accessibility Reading Platform API"}
+
+@app.get("/health")
+async def health_check():
+    """Simple health check endpoint"""
+    return {"status": "healthy", "message": "API is running"}
+
+@app.get("/metrics", response_class=PlainTextResponse)
+async def metrics():
+    """Simple metrics endpoint"""
+    return "# No metrics configured\n"
 
 if __name__ == "__main__":
     import uvicorn

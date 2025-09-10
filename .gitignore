@@ -1,7 +1,3 @@
-# Environment variables
-.env
-*.env
-
 # Python
 __pycache__/
 *.py[cod]
@@ -23,11 +19,34 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# Virtual environments
+# Virtual Environment
 venv/
 env/
 ENV/
+.venv/
+.env/
+
+# Environment Variables
+.env
+.env.local
+.env.production
+.env.development
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+accessibility_platform.db
+
+# ML Models (if large)
+*.pkl
+models/*.pkl
+
+# Logs
+*.log
+logs/
 
 # IDE
 .vscode/
@@ -39,22 +58,42 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-logs/
+# Node.js (Frontend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
 
-# Database
-*.db
-*.sqlite
-*.sqlite3
+# Next.js
+.next/
+out/
+build/
 
-# Cache
-.cache/
+# Production
+/build
+/dist
+
+# Misc
+*.tgz
+*.tar.gz
+
+# Docker
+.dockerignore
+
+# Monitoring
+prometheus_data/
+grafana_data/
+
+# Test coverage
+htmlcov/
+.coverage
 .pytest_cache/
 
-# Models (if too large)
-# models/*.pkl
+# Jupyter Notebook
+.ipynb_checkpoints
 
-# Temporary files
-*.tmp
-*.temp
+# API Keys (backup safety)
+*api_key*
+*secret*
+*token*

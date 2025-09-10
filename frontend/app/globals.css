@@ -1,0 +1,154 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Updated color tokens for clean accessible reading platform */
+  --background: #ffffff; /* Main background for readability */
+  --foreground: #374151; /* Text color for high contrast */
+  --card: #f0fdf4; /* Background for assessment cards */
+  --card-foreground: #374151; /* Text color on cards */
+  --popover: #ffffff; /* Background for popups */
+  --popover-foreground: #374151; /* Text color in popups */
+  --primary: #15803d; /* Primary button color */
+  --primary-foreground: #ffffff; /* Text color on primary buttons */
+  --secondary: #84cc16; /* Accent color for highlights */
+  --secondary-foreground: #374151; /* Text color for secondary elements */
+  --muted: #f0fdf4; /* Background for muted sections */
+  --muted-foreground: #374151; /* Text color for muted sections */
+  --accent: #84cc16; /* Accent color for links and highlights */
+  --accent-foreground: #374151; /* Text color for accent elements */
+  --destructive: #dc2626; /* Color for destructive actions */
+  --destructive-foreground: #ffffff; /* Text color on destructive buttons */
+  --border: #d97706; /* Border color for cards and sections */
+  --input: #ffffff; /* Input field background */
+  --ring: #84cc16; /* Focus ring color for accessibility */
+  --chart-1: #15803d; /* Color for charts */
+  --chart-2: #d97706; /* Additional chart color */
+  --chart-3: #dc2626; /* Additional chart color */
+  --chart-4: #84cc16; /* Additional chart color */
+  --chart-5: #374151; /* Additional chart color */
+  --radius: 0.5rem; /* Corner rounding for elements */
+  --sidebar: #f0fdf4; /* Background for sidebar */
+  --sidebar-foreground: #374151; /* Text color in sidebar */
+  --sidebar-primary: #15803d; /* Primary color in sidebar */
+  --sidebar-primary-foreground: #ffffff; /* Text color for primary sidebar elements */
+  --sidebar-accent: #84cc16; /* Accent color in sidebar */
+  --sidebar-accent-foreground: #374151; /* Text color for sidebar accents */
+  --sidebar-border: #d97706; /* Border color for sidebar */
+  --sidebar-ring: #84cc16; /* Focus ring color for sidebar */
+}
+
+.dark {
+  /* Dark mode tokens for better accessibility */
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: #1e293b;
+  --card-foreground: #f1f5f9;
+  --popover: #0f172a;
+  --popover-foreground: #f1f5f9;
+  --primary: #22c55e;
+  --primary-foreground: #0f172a;
+  --secondary: #a3e635;
+  --secondary-foreground: #0f172a;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #a3e635;
+  --accent-foreground: #0f172a;
+  --destructive: #ef4444;
+  --destructive-foreground: #f1f5f9;
+  --border: #334155;
+  --input: #1e293b;
+  --ring: #a3e635;
+  --sidebar: #1e293b;
+  --sidebar-foreground: #f1f5f9;
+  --sidebar-primary: #22c55e;
+  --sidebar-primary-foreground: #0f172a;
+  --sidebar-accent: #334155;
+  --sidebar-accent-foreground: #f1f5f9;
+  --sidebar-border: #334155;
+  --sidebar-ring: #a3e635;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+}
+
+/* Accessibility-specific styles for reading adaptations */
+.dyslexia-friendly {
+  font-family: "OpenDyslexic", "Comic Sans MS", sans-serif;
+  letter-spacing: 0.12em;
+  line-height: 1.8;
+  word-spacing: 0.16em;
+}
+
+.adhd-focused {
+  line-height: 2;
+  margin-bottom: 1rem;
+}
+
+.vision-enhanced {
+  font-size: 150%;
+  font-weight: 600;
+  filter: contrast(150%);
+}
+
+.high-contrast {
+  filter: contrast(150%);
+}
+
+.reading-guide {
+  background: linear-gradient(
+    transparent 40%,
+    rgba(132, 204, 22, 0.3) 40%,
+    rgba(132, 204, 22, 0.3) 60%,
+    transparent 60%
+  );
+}

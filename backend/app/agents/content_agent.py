@@ -86,7 +86,7 @@ class ContentAgent(BaseAgent):
                     "sentence_complexity": complexity_metrics["avg_sentence_length"],
                     "vocabulary_difficulty": complexity_metrics["difficult_words_ratio"],
                     "ai_insights": ai_insights,
-                    "adaptation_recommendations": await self._generate_adaptation_recommendations(
+                    "adaptation_recommendations": self._generate_adaptation_recommendations(
                         complexity_metrics, user_profile
                     ),
                     "estimated_reading_time": self._estimate_reading_time(text, user_profile),
@@ -185,7 +185,7 @@ class ContentAgent(BaseAgent):
         
         if ai_response["success"]:
             try:
-                adapted_content = await self._perform_vocabulary_adaptation(text, target_level)
+                adapted_content = self._perform_vocabulary_adaptation(text, target_level)
                 
                 return {
                     "adapted_text": adapted_content["text"],
@@ -220,7 +220,7 @@ class ContentAgent(BaseAgent):
         
         if ai_response["success"]:
             try:
-                audio_content = await self._create_audio_optimized_content(text, audio_type, speech_rate)
+                audio_content = self._create_audio_optimized_content(text, audio_type, speech_rate)
                 
                 return {
                     "tts_script": audio_content["script"],
@@ -254,7 +254,7 @@ class ContentAgent(BaseAgent):
         
         if ai_response["success"]:
             try:
-                highlights = await self._generate_intelligent_highlights(text, highlight_purpose, user_conditions)
+                highlights = self._generate_intelligent_highlights(text, highlight_purpose, user_conditions)
                 
                 return {
                     "highlight_map": highlights["map"],
@@ -464,4 +464,161 @@ class ComplexityAnalyzer:
             "difficult_words_ratio": round(difficult_words_ratio, 2),
             "word_count": len(words),
             "sentence_count": len(sentences)
+        }
+    
+    def _generate_intelligent_highlights(self, text: str, purpose: str, user_conditions: List[str]) -> Dict[str, Any]:
+        """Generate intelligent highlights based on content analysis"""
+        sentences = re.split(r'[.!?]+', text)
+        sentences = [s.strip() for s in sentences if len(s.strip()) > 10]
+        
+        # Simple highlighting logic
+        highlight_map = {}
+        for i, sentence in enumerate(sentences):
+            if i == 0 or "important" in sentence.lower() or "key" in sentence.lower():
+                highlight_map[f"sentence_{i}"] = "high_importance"
+            elif len(sentence.split()) > 15:
+                highlight_map[f"sentence_{i}"] = "medium_importance"
+        
+        return {
+            "map": highlight_map,
+            "types": ["importance", "navigation", "focus"],
+            "colors": {"high_importance": "#ffeb3b", "medium_importance": "#e3f2fd"},
+            "importance": ["high", "medium", "low"],
+            "navigation": [f"nav_{i}" for i in range(len(sentences))],
+            "focus_anchors": [f"focus_{i}" for i in range(0, len(sentences), 3)]
+        }
+    
+    def _fallback_highlights(self, text: str) -> Dict[str, Any]:
+        """Fallback highlighting when AI fails"""
+        return {
+            "highlight_map": {"sentence_0": "high_importance"},
+            "highlight_types": ["basic"],
+            "color_coding": {"high_importance": "#ffeb3b"},
+            "importance_levels": ["high"],
+            "navigation_highlights": [],
+            "focus_anchors": ["focus_0"]
+        }
+    
+    def _generate_adaptation_recommendations(self, complexity_metrics: Dict, user_profile: Dict) -> List[str]:
+        """Generate adaptation recommendations based on complexity and user profile"""
+        recommendations = []
+        
+        if complexity_metrics.get("overall_score", 0) > 0.7:
+            recommendations.append("Consider simplifying vocabulary")
+            recommendations.append("Break long sentences into shorter ones")
+        
+        if complexity_metrics.get("avg_sentence_length", 0) > 20:
+            recommendations.append("Reduce sentence length for better readability")
+        
+        user_conditions = user_profile.get("conditions", [])
+        if "dyslexia" in user_conditions:
+            recommendations.append("Use dyslexia-friendly formatting")
+        if "adhd" in user_conditions:
+            recommendations.append("Add attention anchors and breaks")
+        
+        return recommendations if recommendations else ["Content is well-suited for user"]
+    
+    def _assess_attention_demands(self, complexity_metrics: Dict) -> str:
+        """Assess attention demands of the content"""
+        score = complexity_metrics.get("overall_score", 0.5)
+        
+        if score < 0.3:
+            return "low"
+        elif score < 0.7:
+            return "medium"
+        else:
+            return "high"
+    
+    def _perform_vocabulary_adaptation(self, text: str, target_level: str) -> Dict[str, Any]:
+        """Perform vocabulary adaptation"""
+        # Simple word replacement logic
+        simple_replacements = {
+            "utilize": "use",
+            "demonstrate": "show",
+            "facilitate": "help",
+            "approximately": "about",
+            "subsequently": "then"
+        }
+        
+        adapted_text = text
+        changes = []
+        
+        for complex_word, simple_word in simple_replacements.items():
+            if complex_word in adapted_text:
+                adapted_text = adapted_text.replace(complex_word, simple_word)
+                changes.append({"from": complex_word, "to": simple_word})
+        
+        return {
+            "text": adapted_text,
+            "changes": changes,
+            "complexity_change": -0.1 * len(changes),
+            "meaning_score": 0.95,
+            "glossary": {change["to"]: f"Simplified from '{change['from']}'" for change in changes},
+            "level_change": f"Adapted to {target_level} level"
+        }
+    
+    def _create_audio_optimized_content(self, text: str, audio_type: str, speech_rate: str) -> Dict[str, Any]:
+        """Create audio-optimized content"""
+        # Add pauses and emphasis markers
+        script = text.replace(".", ". <pause>")
+        script = script.replace("!", "! <pause>")
+        script = script.replace("?", "? <pause>")
+        
+        return {
+            "script": script,
+            "pauses": ["sentence_end", "paragraph_break"],
+            "emphasis": ["important_terms", "key_concepts"],
+            "pronunciation": {},
+            "descriptions": ["Audio-optimized for accessibility"],
+            "duration": len(text.split()) / 150 * 60,  # seconds
+            "enhancements": ["pause_markers", "emphasis_cues"]
+        }
+    
+    def _calculate_complexity_reduction(self, original: str, summary: str) -> float:
+        """Calculate complexity reduction percentage"""
+        original_words = len(original.split())
+        summary_words = len(summary.split())
+        return round((original_words - summary_words) / original_words, 2) if original_words > 0 else 0
+    
+    def _calculate_time_savings(self, original: str, summary: str) -> float:
+        """Calculate time savings in minutes"""
+        original_time = len(original.split()) / 200  # 200 WPM average
+        summary_time = len(summary.split()) / 200
+        return round(original_time - summary_time, 1)
+    
+    def _fallback_chunking(self, text: str) -> Dict[str, Any]:
+        """Fallback chunking when AI fails"""
+        paragraphs = text.split('\n\n') if '\n\n' in text else [text]
+        chunks = [{"id": f"chunk_{i+1}", "content": p, "word_count": len(p.split())} for i, p in enumerate(paragraphs)]
+        
+        return {
+            "chunks": chunks,
+            "chunk_metadata": {"total_chunks": len(chunks)},
+            "navigation_aids": [f"Section {i+1}" for i in range(len(chunks))],
+            "progressive_disclosure": {"enabled": False},
+            "attention_anchors": [],
+            "estimated_chunk_times": [60] * len(chunks)
+        }
+    
+    def _fallback_vocabulary_adaptation(self, text: str) -> Dict[str, Any]:
+        """Fallback vocabulary adaptation"""
+        return {
+            "adapted_text": text,
+            "vocabulary_changes": [],
+            "complexity_reduction": 0,
+            "meaning_preservation_score": 1.0,
+            "glossary": {},
+            "reading_level_change": "No changes made"
+        }
+    
+    def _fallback_audio_content(self, text: str) -> Dict[str, Any]:
+        """Fallback audio content generation"""
+        return {
+            "tts_script": text,
+            "pause_markers": [],
+            "emphasis_cues": [],
+            "pronunciation_guide": {},
+            "audio_descriptions": [],
+            "estimated_duration": len(text.split()) / 150 * 60,
+            "accessibility_enhancements": []
         }

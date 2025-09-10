@@ -25,9 +25,8 @@ class BaseAgent(ABC):
         self.system_prompt = system_prompt
         self.memory = MockMemory()
         
-        # Check for Gemini API key first, then OpenAI as fallback
+        # Use only Gemini API
         self.use_gemini = os.getenv("GEMINI_API_KEY") and os.getenv("GEMINI_API_KEY") != "your-gemini-api-key-here"
-        self.use_openai = os.getenv("OPENAI_API_KEY") and os.getenv("OPENAI_API_KEY") != "your-openai-api-key-here"
         
         if self.use_gemini:
             try:
@@ -40,21 +39,7 @@ class BaseAgent(ABC):
                 self.use_gemini = False
                 print(f"Warning: Gemini not available for {agent_name}")
         
-        if not self.use_gemini and self.use_openai:
-            try:
-                from langchain_openai import ChatOpenAI
-                self.llm = ChatOpenAI(
-                    model="gpt-3.5-turbo",
-                    temperature=0.7,
-                    openai_api_key=os.getenv("OPENAI_API_KEY")
-                )
-                self.llm_type = "openai"
-                print(f"Using OpenAI API for {agent_name}")
-            except ImportError:
-                self.use_openai = False
-                print(f"Warning: OpenAI not available for {agent_name}")
-        
-        if not self.use_gemini and not self.use_openai:
+        if not self.use_gemini:
             self.llm_type = "mock"
             print(f"Using mock responses for {agent_name}")
     
@@ -63,8 +48,6 @@ class BaseAgent(ABC):
         try:
             if self.use_gemini:
                 return await self._execute_with_gemini(input_data)
-            elif self.use_openai:
-                return await self._execute_with_openai(input_data)
             else:
                 return await self._execute_mock(input_data)
         except Exception as e:
@@ -90,26 +73,7 @@ class BaseAgent(ABC):
             "model": "gemini-pro"
         }
     
-    async def _execute_with_openai(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Execute with real OpenAI"""
-        from langchain.schema import SystemMessage, HumanMessage
-        
-        messages = [
-            SystemMessage(content=self.system_prompt),
-            HumanMessage(content=f"Input: {input_data}")
-        ]
-        
-        response = await self.llm.ainvoke(messages)
-        
-        self.memory.add_user_message(str(input_data))
-        self.memory.add_ai_message(response.content)
-        
-        return {
-            "success": True,
-            "result": response.content,
-            "agent": self.agent_name,
-            "model": "gpt-3.5-turbo"
-        }
+
     
     async def _execute_mock(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """Execute with mock responses for demo"""

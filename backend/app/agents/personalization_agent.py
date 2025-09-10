@@ -163,7 +163,22 @@ class PersonalizationAgent(BaseAgent):
                 "confidence_improvement": self._calculate_learning_confidence(user_id)
             }
         else:
-            return {"error": "Failed to process feedback"}
+            # Fallback processing when AI fails
+            error_details = ai_response.get("error", "Unknown AI processing error")
+            fallback_insights = self._fallback_feedback_processing(feedback_type, feedback_data)
+            
+            return {
+                "learning_insights": fallback_insights,
+                "preference_updates": self._get_preference_updates(user_id),
+                "adaptation_suggestions": fallback_insights.get("suggestions", []),
+                "confidence_improvement": 0.3,
+                "error_info": {
+                    "type": "ai_processing_failed",
+                    "details": error_details,
+                    "fallback_used": True,
+                    "retry_suggested": True
+                }
+            }
     
     async def _predict_preferences(self, data: Dict[str, Any], user_id: str) -> Dict[str, Any]:
         """Predict user preferences for new content or contexts"""
@@ -216,7 +231,7 @@ class PersonalizationAgent(BaseAgent):
         ai_response = await self.execute(tuning_context)
         
         if ai_response["success"]:
-            tuning_recommendations = await self._generate_tuning_recommendations(
+            tuning_recommendations = self._generate_tuning_recommendations(
                 session_data, current_performance, fatigue_indicators
             )
             
@@ -422,6 +437,25 @@ class PersonalizationAgent(BaseAgent):
             "context_adaptations": []
         }
     
+    def _generate_tuning_recommendations(self, session_data: Dict, current_performance: Dict, fatigue_indicators: Dict) -> Dict[str, Any]:
+        """Generate tuning recommendations based on session data"""
+        recommendations = {
+            "immediate_actions": [],
+            "session_tips": []
+        }
+        
+        # Check fatigue indicators
+        if fatigue_indicators.get("reading_speed_decline", 0) > 0.2:
+            recommendations["immediate_actions"].append("Increase font size by 10%")
+            recommendations["session_tips"].append("Consider taking a 5-minute break")
+        
+        # Check performance decline
+        if current_performance.get("comprehension", 1.0) < 0.6:
+            recommendations["immediate_actions"].append("Enable sentence highlighting")
+            recommendations["session_tips"].append("Reduce reading speed")
+        
+        return recommendations
+    
     def _fallback_tuning(self, current_performance: Dict) -> Dict[str, Any]:
         """Fallback tuning when AI fails"""
         return {
@@ -430,3 +464,89 @@ class PersonalizationAgent(BaseAgent):
             "adaptive_actions": [],
             "session_optimization": []
         }
+    
+    def _fallback_feedback_processing(self, feedback_type: str, feedback_data: Dict) -> Dict[str, Any]:
+        """Fallback processing when AI feedback analysis fails"""
+        if feedback_type == "explicit":
+            rating = feedback_data.get("rating", 0)
+            suggestions = ["Continue current settings"] if rating >= 3 else ["Try adjusting font size or spacing"]
+        else:
+            completion_rate = feedback_data.get("completion_rate", 0)
+            suggestions = ["Settings appear effective"] if completion_rate > 0.7 else ["Consider enabling more assistance features"]
+        
+        return {
+            "key_findings": ["Basic feedback analysis completed"],
+            "suggestions": suggestions,
+            "confidence": 0.3
+        }
+    
+    def _get_preference_updates(self, user_id: str) -> Dict[str, Any]:
+        """Get recent preference updates for user"""
+        user_data = self.user_preferences.get(user_id, {})
+        return {
+            "recent_changes": user_data.get("recent_changes", []),
+            "trending_preferences": user_data.get("trending_preferences", {}),
+            "last_updated": user_data.get("last_updated", "never")
+        }
+    
+    def _calculate_learning_confidence(self, user_id: str) -> float:
+        """Calculate confidence in learning model for user"""
+        user_data = self.user_preferences.get(user_id, {})
+        learning_data = user_data.get("learning_data", [])
+        return min(len(learning_data) * 0.1, 0.9)
+    
+    def _generate_predicted_settings(self, user_profile: Dict, content_info: Dict, context_info: Dict) -> Dict[str, Any]:
+        """Generate predicted settings based on user profile and context"""
+        base_settings = user_profile.get("preferences", {})
+        
+        # Simple prediction logic
+        predicted = {
+            "font_size": base_settings.get("font_size", "110%"),
+            "line_spacing": base_settings.get("line_spacing", "1.5"),
+            "highlighting": "moderate"
+        }
+        
+        # Adjust for content type
+        if content_info.get("complexity") == "high":
+            predicted["highlighting"] = "high"
+            predicted["font_size"] = "120%"
+        
+        return predicted
+    
+    def _calculate_prediction_confidence(self, user_profile: Dict, content_info: Dict) -> float:
+        """Calculate confidence in prediction"""
+        sessions = len(user_profile.get("sessions", []))
+        return min(sessions * 0.15, 0.85)
+    
+    def _generate_alternatives(self, predicted_settings: Dict) -> List[Dict]:
+        """Generate alternative setting options"""
+        return [
+            {"name": "Conservative", "font_size": "100%", "highlighting": "low"},
+            {"name": "Enhanced", "font_size": "130%", "highlighting": "high"}
+        ]
+    
+    def _suggest_context_adaptations(self, context_info: Dict) -> List[str]:
+        """Suggest adaptations based on context"""
+        adaptations = []
+        if context_info.get("time_of_day") == "evening":
+            adaptations.append("Consider dark mode for evening reading")
+        if context_info.get("device") == "mobile":
+            adaptations.append("Increase font size for mobile reading")
+        return adaptations
+    
+    def _assess_tuning_urgency(self, current_performance: Dict, fatigue_indicators: Dict) -> str:
+        """Assess urgency of tuning adjustments"""
+        if fatigue_indicators.get("reading_speed_decline", 0) > 0.3:
+            return "high"
+        elif current_performance.get("comprehension", 1.0) < 0.5:
+            return "medium"
+        return "low"
+    
+    def _suggest_adaptive_features(self, reading_performance: Dict) -> List[str]:
+        """Suggest adaptive features based on performance"""
+        features = []
+        if reading_performance.get("comprehension", 0) < 0.6:
+            features.append("Enable sentence-by-sentence highlighting")
+        if reading_performance.get("reading_speed", 0) < 0.4:
+            features.append("Consider text-to-speech assistance")
+        return features

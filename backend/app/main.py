@@ -1,4 +1,3 @@
-from app.auth import auth_routes
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import dyslexia, adhd, adaptation, agentic_api, tts_simple
@@ -26,9 +25,6 @@ app.include_router(adaptation.router, prefix="/api/adaptation", tags=["adaptatio
 # Analytics routes
 app.include_router(dashboard.router)
 app.include_router(export.router)
-
-# Authentication routes
-app.include_router(auth_routes.router, prefix="/auth", tags=["authentication"])
 
 # Agentic AI routes
 app.include_router(agentic_api.router, prefix="/api/agents", tags=["agentic-ai"])

@@ -6,8 +6,8 @@ import sys
 
 # Ensure app modules are importable
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
-from models import Base
-from app.database.connection import DATABASE_URL
+from app.database.models import Base
+from app.database.database import DATABASE_URL
 
 # Alembic Config
 config = context.config

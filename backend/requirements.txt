@@ -16,3 +16,6 @@ redis==5.0.1
 sqlalchemy==2.0.23
 asyncio-mqtt==0.16.1
 kagglehub==0.2.0
+PyJWT==2.8.0
+bcrypt==4.1.2
+slowapi==0.1.9

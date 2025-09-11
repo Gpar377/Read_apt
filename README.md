@@ -7,11 +7,15 @@ A complete cognitive load-adaptive reading platform for users with dyslexia, ADH
 ### Core Capabilities
 - **Real ML Models**: Trained on Kaggle datasets with 100% dyslexia accuracy, 90% ADHD accuracy
 - **4 AI Agents**: Assessment, Personalization, Content, and Monitoring agents using Gemini API
+- **OCR Text Extraction**: Upload images/documents to extract and adapt text automatically
 - **Text Adaptation Engine**: Real-time processing with 6+ accessibility features
+- **Single Disorder Focus**: Apply adaptations for one condition at a time for optimal results
 - **TTS Integration**: Browser Web Speech API with condition-specific optimizations
-- **10 API Endpoints**: Complete backend infrastructure ready for production
+- **12 API Endpoints**: Complete backend infrastructure ready for production
 
 ### Accessibility Features
+- **OCR Integration**: Extract text from images, PDFs, and scanned documents
+- **Single Disorder Mode**: Focus on one condition at a time for better results
 - **Dyslexia Support**: Heavy spacing, highlighting, slower TTS (0.8x rate)
 - **ADHD Support**: Sentence chunking, TL;DR generation, focused content
 - **Vision Support**: Large text (150%), high contrast, optimized colors
@@ -40,20 +44,22 @@ A complete cognitive load-adaptive reading platform for users with dyslexia, ADH
 ```bash
 # Clone repository
 git clone <repository-url>
-cd accessibility-reading-platform/backend
+cd accessibility-reading-platform
 
-# Install dependencies
+# Install OCR dependencies (Windows)
+install-ocr-dependencies.bat
+
+# Install backend dependencies
+cd backend
 pip install -r requirements.txt
 
 # Configure environment
 cp .env.example .env
 # Add your GEMINI_API_KEY to .env
 
-# Run complete system demo
-python COMPLETE_SYSTEM_DEMO.py
-
-# Start API server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# Start complete platform
+cd ..
+start-complete-platform.bat
 ```
 
 ## 📊 ML Models & Training

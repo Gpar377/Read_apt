@@ -20,6 +20,12 @@ export function Navbar() {
           <Link href="/text-adaptation">
             <Button variant="ghost" size="sm">Text Tool</Button>
           </Link>
+          <Link href="/ocr">
+            <Button variant="ghost" size="sm">OCR</Button>
+          </Link>
+          <Link href="/tts">
+            <Button variant="ghost" size="sm">TTS</Button>
+          </Link>
           <Link href="/adaptation">
             <Button variant="ghost" size="sm">Settings</Button>
           </Link>

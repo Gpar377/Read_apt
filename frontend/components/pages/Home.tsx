@@ -1,7 +1,7 @@
 import { MainLayout } from "@/components/templates/MainLayout"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Brain, FileText, Volume2, Zap, Shield, Users } from "lucide-react"
+import { Brain, FileText, Volume2, FileImage, Zap, Shield, Users } from "lucide-react"
 import Link from "next/link"
 
 export const Home = () => {
@@ -23,6 +23,12 @@ export const Home = () => {
       title: "Text-to-Speech",
       description: "Natural voice synthesis optimized for different learning needs",
       href: "/tts",
+    },
+    {
+      icon: FileImage,
+      title: "OCR Text Extraction",
+      description: "Upload images to extract and adapt text with accessibility features",
+      href: "/ocr",
     },
   ]
 

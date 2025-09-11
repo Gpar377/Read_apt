@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Input } from "@/components/ui/input"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Home, Settings, ArrowRight } from "lucide-react"
 import { apiService } from "@/services/api"
 import { useRouter } from "next/navigation"
 
@@ -74,6 +74,7 @@ export const AssessmentForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isReading, setIsReading] = useState(false)
   const [readingStartTime, setReadingStartTime] = useState<number | null>(null)
+  const [isCompleted, setIsCompleted] = useState(false)
   const router = useRouter()
 
   const totalSteps = assessmentSteps.length + adhdQuestions.length
@@ -164,7 +165,18 @@ export const AssessmentForm = () => {
         }),
       )
 
-      router.push("/adaptation?assessment=complete")
+      // Show completion message with navigation options
+      const completionData = {
+        dyslexia: dyslexiaResult,
+        adhd: adhdResult,
+        vision: visionResult,
+        rawData: assessmentData,
+      }
+      
+      localStorage.setItem("assessmentResults", JSON.stringify(completionData))
+      
+      // Set completion state to show success message
+      setIsCompleted(true)
     } catch (error) {
       console.error("Assessment submission failed:", error)
     } finally {
@@ -183,6 +195,48 @@ export const AssessmentForm = () => {
     return assessmentData.adhdAnswers[currentADHDQuestion] >= 0
   }
 
+  // Show completion screen
+  if (isCompleted) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-center text-green-600">Assessment Complete! 🎉</CardTitle>
+          <CardDescription className="text-center">
+            Your reading assessment has been completed successfully. You can now use the text adaptation tools.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="text-center space-y-4">
+            <p className="text-muted-foreground">
+              Based on your assessment, we've personalized your reading experience. 
+              You can now access the text adaptation tools with your custom settings.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button
+                onClick={() => router.push("/text-adaptation")}
+                className="flex items-center gap-2"
+              >
+                <Settings className="w-4 h-4" />
+                Continue to Text Tool
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={() => router.push("/")}
+                className="flex items-center gap-2"
+              >
+                <Home className="w-4 h-4" />
+                Back to Dashboard
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -191,7 +245,7 @@ export const AssessmentForm = () => {
             <CardTitle>
               {currentStep < assessmentSteps.length 
                 ? assessmentSteps[currentStep].title
-                : `ADHD Question ${currentADHDQuestion + 1} of ${adhdQuestions.length}`
+                : ADHD Question ${currentADHDQuestion + 1} of ${adhdQuestions.length}
               }
             </CardTitle>
             <CardDescription>
@@ -204,6 +258,29 @@ export const AssessmentForm = () => {
           <div className="text-sm text-muted-foreground">{Math.round(progress)}% Complete</div>
         </div>
         <Progress value={progress} className="mt-4" />
+        
+        {/* Navigation Options */}
+        <div className="flex gap-2 mt-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/")}
+            className="flex items-center gap-2"
+          >
+            <Home className="w-4 h-4" />
+            Back to Dashboard
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push("/text-adaptation")}
+            className="flex items-center gap-2"
+          >
+            <Settings className="w-4 h-4" />
+            Continue to Text Tool
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
@@ -285,6 +362,6 @@ export const AssessmentForm = () => {
           )}
         </div>
       </CardContent>
-    </Card>
-  )
+    </Card>
+  )
 }

@@ -54,10 +54,40 @@ async def get_css_styles():
     """Get CSS classes for text adaptations"""
     return {
         "css": """
-        .dyslexic-highlight {
-            background-color: #ffeb3b;
+        .dyslexic-mirror {
+            background-color: #fef3c7;
+            color: #92400e;
+            font-weight: bold;
+            padding: 1px 3px;
+            border-radius: 3px;
+            border: 1px solid #f59e0b;
+        }
+        
+        .dyslexic-vowel {
+            background-color: #dbeafe;
+            color: #1e40af;
+            font-weight: 600;
             padding: 1px 2px;
             border-radius: 2px;
+        }
+        
+        .dyslexic-syllables {
+            letter-spacing: 2px;
+            word-spacing: 4px;
+        }
+        
+        .reading-line-odd {
+            background-color: #f9fafb;
+            padding: 8px 12px;
+            margin: 2px 0;
+            border-left: 3px solid #10b981;
+        }
+        
+        .reading-line-even {
+            background-color: #f3f4f6;
+            padding: 8px 12px;
+            margin: 2px 0;
+            border-left: 3px solid #3b82f6;
         }
         
         .adhd-highlight {

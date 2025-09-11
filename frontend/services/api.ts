@@ -84,6 +84,22 @@ class ApiService {
       body: JSON.stringify({ query }),
     })
   }
+
+  // OCR endpoints
+  async extractTextFromImage(imageBase64: string, disorderType?: string, severity?: string) {
+    return this.request("/ocr/extract-and-adapt", {
+      method: "POST",
+      body: JSON.stringify({
+        image_base64: imageBase64,
+        disorder_type: disorderType,
+        severity: severity
+      }),
+    })
+  }
+
+  async getSupportedFormats() {
+    return this.request("/ocr/supported-formats")
+  }
 }
 
 export const apiService = new ApiService()

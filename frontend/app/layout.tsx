@@ -4,6 +4,7 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { UserPreferencesProvider } from "@/components/context/UserPreferencesContext"
+import { ErrorBoundary } from "@/components/ErrorBoundary"
 import { Navbar } from "@/components/Navbar"
 import { Suspense } from "react"
 import "./globals.css"
@@ -22,11 +23,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <Suspense fallback={null}>
-          <UserPreferencesProvider>
-            <main>{children}</main>
-          </UserPreferencesProvider>
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={null}>
+            <UserPreferencesProvider>
+              <main>{children}</main>
+            </UserPreferencesProvider>
+          </Suspense>
+        </ErrorBoundary>
         <Analytics />
       </body>
     </html>

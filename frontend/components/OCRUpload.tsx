@@ -77,44 +77,17 @@ export function OCRUpload({ onTextExtracted }: OCRUploadProps) {
 
   return (
     <div className="space-y-6">
-      {/* Disorder Selection */}
+      {/* OCR Available for All Users */}
       <Card>
         <CardHeader>
-          <CardTitle>Accessibility Settings</CardTitle>
-          <CardDescription>Choose your primary reading difficulty (one at a time)</CardDescription>
+          <CardTitle>OCR Text Extraction</CardTitle>
+          <CardDescription>Extract text from images - available for all users</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium">Primary Disorder</label>
-              <Select value={selectedDisorder} onValueChange={setSelectedDisorder}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select disorder" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="normal">No Adaptation</SelectItem>
-                  <SelectItem value="dyslexia">Dyslexia</SelectItem>
-                  <SelectItem value="adhd">ADHD</SelectItem>
-                  <SelectItem value="vision">Vision Impairment</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {selectedDisorder !== "normal" && (
-              <div>
-                <label className="text-sm font-medium">Severity</label>
-                <Select value={severity} onValueChange={setSeverity}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select severity" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="mild">Mild</SelectItem>
-                    <SelectItem value="severe">Severe</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Upload an image containing text and we'll extract it for you. 
+            Your assessment results will be automatically applied to the extracted text.
+          </p>
         </CardContent>
       </Card>
 

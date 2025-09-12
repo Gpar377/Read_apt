@@ -7,6 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { apiService } from "@/services/api"
+import { AssessmentRedirect } from "@/components/AssessmentRedirect"
 
 const adhdQuestions = [
   "Often fails to give close attention to details or makes careless mistakes",
@@ -38,6 +39,8 @@ export function ADHDAssessment({ onComplete, onBack }: ADHDAssessmentProps) {
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [answers, setAnswers] = useState<number[]>(new Array(18).fill(-1))
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [assessmentResult, setAssessmentResult] = useState<any>(null)
+  const [isComplete, setIsComplete] = useState(false)
 
   const handleAnswerChange = (value: string) => {
     const newAnswers = [...answers]
@@ -63,17 +66,32 @@ export function ADHDAssessment({ onComplete, onBack }: ADHDAssessmentProps) {
       const result = await apiService.predictADHD({
         answers: answers
       })
-      onComplete(result)
+      
+      // Store result and redirect immediately
+      localStorage.setItem('assessmentResults', JSON.stringify({ adhd: result }))
+      window.location.href = '/text-adaptation'
     } catch (error) {
       console.error('ADHD assessment failed:', error)
     } finally {
       setIsSubmitting(false)
     }
   }
+  
+  const addMoreQuestions = () => {
+    const additionalQuestions = [
+      "Often has trouble keeping attention on work or play activities",
+      "Often does not finish things they start",
+      "Often loses homework, pencils, books, or tools needed for work or play",
+      "Often seems to not listen when people talk to them"
+    ]
+    return [...adhdQuestions, ...additionalQuestions]
+  }
 
   const progress = ((currentQuestion + 1) / adhdQuestions.length) * 100
   const isLastQuestion = currentQuestion === adhdQuestions.length - 1
   const canProceed = answers[currentQuestion] >= 0
+
+
 
   return (
     <Card>
@@ -111,7 +129,11 @@ export function ADHDAssessment({ onComplete, onBack }: ADHDAssessmentProps) {
           </Button>
 
           {isLastQuestion ? (
-            <Button onClick={handleSubmit} disabled={!canProceed || isSubmitting}>
+            <Button 
+              onClick={handleSubmit} 
+              disabled={!canProceed || isSubmitting}
+              type="button"
+            >
               {isSubmitting ? "Submitting..." : "Complete Assessment"}
             </Button>
           ) : (

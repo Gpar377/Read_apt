@@ -64,15 +64,15 @@ export const Home = () => {
             Accessible Reading for <span className="text-primary">Everyone</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto text-pretty">
-            ReadApt uses AI to adapt text for users with dyslexia, ADHD, and vision difficulties. Take our quick
-            assessment to get personalized reading support.
+            ReadApt uses AI to adapt text for users with dyslexia, ADHD, and vision difficulties. 
+            Select your condition and get personalized reading support.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
-              <Link href="/assessment">Start Assessment</Link>
+              <Link href="/assessment">Select Your Condition & Start Assessment</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link href="/adaptation">Try Text Adaptation</Link>
+              <Link href="/text-adaptation">Try Text Adaptation</Link>
             </Button>
           </div>
         </div>

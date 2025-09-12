@@ -20,17 +20,17 @@ export function DyslexiaTextRenderer({ text, severity, className = "" }: Dyslexi
         // 1. Highlight mirror letters
         const mirrorPairs = [['b', 'd'], ['p', 'q'], ['m', 'w'], ['n', 'u']]
         mirrorPairs.forEach(([letter1, letter2]) => {
-          const regex1 = new RegExp(letter1, 'gi')
-          const regex2 = new RegExp(letter2, 'gi')
-          processed = processed.replace(regex1, `<span class="mirror-letter">${letter1}</span>`)
-          processed = processed.replace(regex2, `<span class="mirror-letter">${letter2}</span>`)
+          const regex1 = new RegExp(`(?<!<[^>]*)(${letter1})(?![^<]*>)`, 'gi')
+          const regex2 = new RegExp(`(?<!<[^>]*)(${letter2})(?![^<]*>)`, 'gi')
+          processed = processed.replace(regex1, `<span style="background-color: #fef3c7; padding: 2px 4px; border-radius: 3px; font-weight: 700; color: #92400e; border: 1px solid #f59e0b;">$1</span>`)
+          processed = processed.replace(regex2, `<span style="background-color: #fef3c7; padding: 2px 4px; border-radius: 3px; font-weight: 700; color: #92400e; border: 1px solid #f59e0b;">$2</span>`)
         })
         
         // 2. Color-code vowels
         const vowels = ['a', 'e', 'i', 'o', 'u']
         vowels.forEach(vowel => {
-          const regex = new RegExp(vowel, 'gi')
-          processed = processed.replace(regex, `<span class="vowel-highlight">${vowel}</span>`)
+          const regex = new RegExp(`(?<!<[^>]*)(${vowel})(?![^<]*>)`, 'gi')
+          processed = processed.replace(regex, `<span style="background-color: #dbeafe; padding: 1px 2px; border-radius: 2px; color: #1e40af;">$1</span>`)
         })
         
         // 3. Break long words with syllable markers
@@ -49,10 +49,10 @@ export function DyslexiaTextRenderer({ text, severity, className = "" }: Dyslexi
         let processed = text
         const mirrorPairs = [['b', 'd'], ['p', 'q'], ['m', 'w'], ['n', 'u']]
         mirrorPairs.forEach(([letter1, letter2]) => {
-          const regex1 = new RegExp(letter1, 'gi')
-          const regex2 = new RegExp(letter2, 'gi')
-          processed = processed.replace(regex1, `<span class="mirror-letter">${letter1}</span>`)
-          processed = processed.replace(regex2, `<span class="mirror-letter">${letter2}</span>`)
+          const regex1 = new RegExp(`(?<!<[^>]*)(${letter1})(?![^<]*>)`, 'gi')
+          const regex2 = new RegExp(`(?<!<[^>]*)(${letter2})(?![^<]*>)`, 'gi')
+          processed = processed.replace(regex1, `<span style="background-color: #fef3c7; padding: 2px 4px; border-radius: 3px; font-weight: 700; color: #92400e; border: 1px solid #f59e0b;">$1</span>`)
+          processed = processed.replace(regex2, `<span style="background-color: #fef3c7; padding: 2px 4px; border-radius: 3px; font-weight: 700; color: #92400e; border: 1px solid #f59e0b;">$2</span>`)
         })
         setProcessedText(processed)
       }

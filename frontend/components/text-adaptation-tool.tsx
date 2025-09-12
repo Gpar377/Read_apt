@@ -12,7 +12,10 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Play, Pause, RotateCcw, Settings2, Eye, Brain, Zap } from "lucide-react"
+import { Play, Pause, RotateCcw, Settings2, Eye, Brain, Zap, Sparkles } from "lucide-react"
+import { ADHDTextRenderer } from "@/components/ADHDTextRenderer"
+import { DyslexiaTextRenderer } from "@/components/DyslexiaTextRenderer"
+import { AIBehaviorAgent } from "@/components/AIBehaviorAgent"
 
 const sampleText = `Reading is a complex cognitive process that involves decoding symbols to derive meaning. For individuals with dyslexia, ADHD, or vision difficulties, traditional text formatting can present significant challenges. However, with proper adaptations such as increased spacing, dyslexia-friendly fonts, and high contrast colors, reading becomes much more accessible and enjoyable.`
 
@@ -28,13 +31,23 @@ export function TextAdaptationTool() {
   const [activePreset, setActivePreset] = useState<string | null>(null)
   const [isAdapting, setIsAdapting] = useState(false)
   const [userConditions, setUserConditions] = useState<any>(null)
+  const [showSummary, setShowSummary] = useState(false)
+  const [summary, setSummary] = useState("")
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false)
+  const [userDisorder, setUserDisorder] = useState<string | null>(null)
 
   // Load user assessment results
   useEffect(() => {
     const results = localStorage.getItem('assessmentResults')
     if (results) {
       try {
-        setUserConditions(JSON.parse(results))
+        const parsedResults = JSON.parse(results)
+        setUserConditions(parsedResults)
+        
+        // Determine primary disorder
+        if (parsedResults.dyslexia) setUserDisorder('dyslexia')
+        else if (parsedResults.adhd) setUserDisorder('adhd')
+        else if (parsedResults.vision) setUserDisorder('vision')
       } catch (error) {
         console.error('Failed to parse assessment results:', error)
         localStorage.removeItem('assessmentResults')
@@ -167,29 +180,96 @@ export function TextAdaptationTool() {
     }
 
     try {
-      // Use backend TTS service
-      const ttsRequest = {
-        text: displayText,
-        voice: activePreset === 'dyslexia' ? 'slow' : activePreset === 'adhd' ? 'clear' : 'normal',
-        speed: activePreset === 'dyslexia' ? 0.8 : activePreset === 'adhd' ? 0.9 : 1.0
+      // Use browser TTS with female voice
+      const utterance = new SpeechSynthesisUtterance(displayText)
+      
+      // Set female voice
+      const voices = speechSynthesis.getVoices()
+      const femaleVoice = voices.find(voice => 
+        voice.name.toLowerCase().includes('female') || 
+        voice.name.toLowerCase().includes('woman') ||
+        voice.name.toLowerCase().includes('zira') ||
+        voice.name.toLowerCase().includes('hazel')
+      ) || voices.find(voice => voice.gender === 'female')
+      
+      if (femaleVoice) {
+        utterance.voice = femaleVoice
       }
       
-      await apiService.speakText(ttsRequest)
-      setIsPlaying(true)
-      
-      // Fallback to browser TTS
-      const utterance = new SpeechSynthesisUtterance(displayText)
-      utterance.rate = ttsRequest.speed
+      utterance.rate = userDisorder === 'dyslexia' ? 0.7 : userDisorder === 'adhd' ? 0.9 : 0.8
+      utterance.pitch = 1.1
+      utterance.volume = 1.0
       utterance.onend = () => setIsPlaying(false)
+      utterance.onerror = () => setIsPlaying(false)
+      
       speechSynthesis.speak(utterance)
+      setIsPlaying(true)
     } catch (error) {
       console.error('TTS failed:', error)
-      // Fallback to browser TTS
-      const utterance = new SpeechSynthesisUtterance(displayText)
-      utterance.rate = activePreset === "dyslexia" ? 0.7 : activePreset === "adhd" ? 0.9 : 0.8
-      utterance.onend = () => setIsPlaying(false)
-      speechSynthesis.speak(utterance)
-      setIsPlaying(true)
+      setIsPlaying(false)
+    }
+  }
+  
+  const generateSummary = async () => {
+    setIsGeneratingSummary(true)
+    try {
+      const summaryType = activePreset === 'adhd' ? 'adhd' : 'general'
+      const result = await apiService.generateSummary(displayText, summaryType, 100)
+      
+      if (result.success) {
+        setSummary(result.summary)
+        setShowSummary(true)
+      } else {
+        setSummary("Summary generation failed. Please try again.")
+        setShowSummary(true)
+      }
+    } catch (error) {
+      console.error('Summary generation failed:', error)
+      setSummary("Summary generation failed. Please try again.")
+      setShowSummary(true)
+    } finally {
+      setIsGeneratingSummary(false)
+    }
+  }
+  
+  const handleAISuggestion = (action: string) => {
+    switch (action) {
+      case 'increase_line_spacing':
+        setLineSpacing([Math.min(lineSpacing[0] + 0.2, 3)])
+        break
+      case 'enable_tts':
+        handleTTS()
+        break
+      case 'increase_font_size':
+        setFontSize([Math.min(fontSize[0] + 2, 28)])
+        break
+      case 'summarize_text':
+      case 'generate_summary':
+        generateSummary()
+        break
+      case 'increase_spacing':
+        setLetterSpacing([Math.min(letterSpacing[0] + 0.05, 0.3)])
+        break
+      case 'chunk_text':
+        if (activePreset !== 'adhd') {
+          applyPreset('adhd')
+        }
+        break
+      case 'highlight_keywords':
+      case 'highlight_confusing_letters':
+        if (activePreset !== 'dyslexia') {
+          applyPreset('dyslexia')
+        }
+        break
+      case 'dyslexic_font':
+        setFontFamily('dyslexic')
+        break
+      case 'high_contrast':
+        setColorScheme('high-contrast')
+        break
+      case 'increase_zoom':
+        setFontSize([Math.min(fontSize[0] + 4, 28)])
+        break
     }
   }
 
@@ -205,69 +285,46 @@ export function TextAdaptationTool() {
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h2 className="text-3xl font-bold">Real-Time Text Adaptation</h2>
-        <p className="text-muted-foreground text-balance max-w-2xl mx-auto">
-          Transform any text with 6+ accessibility features. Apply condition-specific presets or customize manually for
-          optimal readability.
-        </p>
+        <h2 className="text-3xl font-bold">Text Adaptation Tool</h2>
+        {userDisorder && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto">
+            <h3 className="font-semibold text-blue-800 capitalize">
+              {userDisorder} Adaptation Active
+            </h3>
+            <p className="text-blue-700 text-sm">
+              {userDisorder === 'dyslexia' && 'Letter highlighting and dyslexia-friendly formatting enabled'}
+              {userDisorder === 'adhd' && 'Word highlighting and chunking features available'}
+              {userDisorder === 'vision' && 'High contrast and large text options enabled'}
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Preset Cards */}
-      <div className="grid md:grid-cols-3 gap-6">
-        <Card className={`cursor-pointer transition-all ${activePreset === "dyslexia" ? "ring-2 ring-primary" : ""}`}>
+      {/* Disorder-Specific Preset */}
+      {userDisorder && (
+        <Card className="border-2 border-primary">
           <CardHeader>
             <div className="flex items-center gap-3">
-              <Brain className="w-8 h-8 text-primary" />
+              {userDisorder === 'dyslexia' && <Brain className="w-8 h-8 text-primary" />}
+              {userDisorder === 'adhd' && <Zap className="w-8 h-8 text-primary" />}
+              {userDisorder === 'vision' && <Eye className="w-8 h-8 text-primary" />}
               <div>
-                <CardTitle>Dyslexia Preset</CardTitle>
-                <p className="text-sm text-muted-foreground">Heavy spacing, dyslexic font</p>
+                <CardTitle className="capitalize">{userDisorder} Preset</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {userDisorder === 'dyslexia' && 'Letter highlighting, dyslexic font, increased spacing'}
+                  {userDisorder === 'adhd' && 'Word highlighting, text chunking, summarization'}
+                  {userDisorder === 'vision' && 'Large text, high contrast, maximum spacing'}
+                </p>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => applyPreset("dyslexia")} className="w-full">
-              Apply Dyslexia Settings
+            <Button onClick={() => applyPreset(userDisorder)} className="w-full">
+              Apply {userDisorder.charAt(0).toUpperCase() + userDisorder.slice(1)} Settings
             </Button>
           </CardContent>
         </Card>
-
-        <Card className={`cursor-pointer transition-all ${activePreset === "adhd" ? "ring-2 ring-accent" : ""}`}>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <Zap className="w-8 h-8 text-accent" />
-              <div>
-                <CardTitle>ADHD Preset</CardTitle>
-                <p className="text-sm text-muted-foreground">Chunking, focus mode</p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => applyPreset("adhd")} className="w-full">
-              Apply ADHD Settings
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card className={`cursor-pointer transition-all ${activePreset === "vision" ? "ring-2 ring-secondary" : ""}`}>
-          <CardHeader>
-            <div className="flex items-center gap-3">
-              <Eye className="w-8 h-8 text-secondary" />
-              <div>
-                <CardTitle>Vision Preset</CardTitle>
-                <p className="text-sm text-muted-foreground">Large text, high contrast</p>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => applyPreset("vision")} className="w-full">
-              Apply Vision Settings
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* User Profile Section */}
-      <UserProfile onAdaptText={(conditions) => adaptTextWithBackend(inputText || sampleText, conditions)} />
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Input Section */}
@@ -305,6 +362,8 @@ export function TextAdaptationTool() {
               </div>
             </CardContent>
           </Card>
+          
+
 
           {/* Controls */}
           <Card>
@@ -366,9 +425,47 @@ export function TextAdaptationTool() {
                 </Button>
                 <Button variant="outline" size="sm" onClick={handleTTS} className="flex-1 bg-transparent">
                   {isPlaying ? <Pause className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
-                  {isPlaying ? "Pause" : "Listen"}
+                  {isPlaying ? "Stop" : "Listen (Female Voice)"}
                 </Button>
               </div>
+              
+              {/* Disorder-specific features */}
+              {userDisorder === 'adhd' && (
+                <div className="mt-4">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={generateSummary} 
+                    disabled={isGeneratingSummary}
+                    className="w-full"
+                  >
+                    {isGeneratingSummary ? (
+                      <>
+                        <div className="animate-spin w-4 h-4 border-2 border-primary border-t-transparent rounded-full mr-2"></div>
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Generate TL;DR
+                      </>
+                    )}
+                  </Button>
+                </div>
+              )}
+              
+              {userDisorder === 'vision' && (
+                <div className="mt-4 space-y-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setColorScheme('high-contrast')}
+                    className="w-full"
+                  >
+                    High Contrast Mode
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -392,12 +489,49 @@ export function TextAdaptationTool() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div
-                className="p-6 rounded-lg border min-h-[400px] transition-all duration-300"
-                style={getAdaptedStyles()}
-              >
-                <p className="text-pretty">{displayText}</p>
-              </div>
+              {userDisorder === 'adhd' ? (
+                <ADHDTextRenderer 
+                  text={displayText}
+                  preset={userConditions?.adhd?.type === 'combined' ? 'combined' : 
+                          userConditions?.adhd?.type === 'hyperactive' ? 'hyperactive' : 
+                          userConditions?.adhd?.type === 'inattentive' ? 'inattentive' : 'normal'}
+                  onSummarize={generateSummary}
+                />
+              ) : userDisorder === 'dyslexia' ? (
+                <DyslexiaTextRenderer 
+                  text={displayText}
+                  severity={userConditions?.dyslexia?.severity === 'severe' ? 'severe' : 'mild'}
+                />
+              ) : (
+                <div
+                  className="p-6 rounded-lg border min-h-[400px] transition-all duration-300"
+                  style={getAdaptedStyles()}
+                >
+                  <p className="text-pretty">{displayText}</p>
+                </div>
+              )}
+              
+              {showSummary && (
+                <Card className="mt-4 border-blue-200">
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-blue-500" />
+                      TL;DR Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm bg-blue-50 p-3 rounded">{summary}</p>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => setShowSummary(false)}
+                      className="mt-2"
+                    >
+                      Hide Summary
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
 
               <div className="mt-4 p-4 bg-muted/50 rounded-lg">
                 <h4 className="font-semibold text-sm mb-2">Current Adaptation:</h4>
@@ -422,6 +556,12 @@ export function TextAdaptationTool() {
           </Card>
         </div>
       </div>
+      
+      {/* AI Behavior Agent */}
+      <AIBehaviorAgent 
+        userCondition={userDisorder as "dyslexia" | "adhd" | "vision" | null}
+        onSuggestionApply={handleAISuggestion}
+      />
     </div>
   )
 }

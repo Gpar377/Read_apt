@@ -36,8 +36,8 @@ class ApiService {
   }
 
   // Assessment endpoints
-  async predictDyslexia(data: AssessmentData) {
-    return this.request("/dyslexia/predict", {
+  async predictDyslexia(data: any) {
+    return this.request("/dyslexia/predict-enhanced", {
       method: "POST",
       body: JSON.stringify(data),
     })
@@ -99,6 +99,33 @@ class ApiService {
 
   async getSupportedFormats() {
     return this.request("/ocr/supported-formats")
+  }
+
+  // Summary endpoints
+  async generateSummary(text: string, summaryType: string = "general", maxLength: number = 100) {
+    return this.request("/summary/generate", {
+      method: "POST",
+      body: JSON.stringify({
+        text: text,
+        summary_type: summaryType,
+        max_length: maxLength
+      }),
+    })
+  }
+
+  async generateTLDR(text: string) {
+    return this.request("/summary/tldr", {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    })
+  }
+
+  // Enhanced assessment endpoints
+  async predictDyslexiaEnhanced(data: { reading_speed: number; survey_score: number; comprehension_score?: number }) {
+    return this.request("/dyslexia/predict-enhanced", {
+      method: "POST",
+      body: JSON.stringify(data),
+    })
   }
 }
 

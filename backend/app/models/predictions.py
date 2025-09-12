@@ -6,25 +6,29 @@ class DyslexiaInput(BaseModel):
     survey_score: float  # 0-1 comprehension score
 
 class DyslexiaResult(BaseModel):
-    severity: int  # 0: severe, 1: mild, 2: no dyslexia
+    severity: str  # "severe", "mild", "normal"
     confidence: float
-    adaptation_preset: str
+    preset: int  # 0: severe, 1: mild, 2: normal
+    recommendations: List[str] = []
 
 class ADHDInput(BaseModel):
     q1_responses: List[int]  # Q1_1 to Q1_9 (hyperactivity)
     q2_responses: List[int]  # Q2_1 to Q2_9 (inattention)
 
 class ADHDResult(BaseModel):
-    type: int  # 0: no ADHD, 1: inattentive, 2: hyperactive, 3: severe
+    type: str  # "normal", "inattentive", "hyperactive", "combined"
     confidence: float
-    adaptation_preset: str
+    preset: int  # 0-3
+    recommendations: List[str] = []
 
 class VisionInput(BaseModel):
     glasses_power: float  # Diopter value
 
 class VisionResult(BaseModel):
-    class_level: int  # 0: normal, 1: mild, 2: low vision
-    adaptation_preset: str
+    level: str  # "normal", "mild", "moderate", "severe"
+    confidence: float
+    preset: int
+    recommendations: List[str] = []
 
 class TextAdaptation(BaseModel):
     text: str

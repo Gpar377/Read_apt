@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import dyslexia, adhd, adaptation, agentic_api, tts_simple, user_profile, ocr
+from app.api import dyslexia, adhd, adaptation, agentic_api, tts_simple, user_profile, ocr, summary
 from app.analytics import dashboard, export
 from app.auth import auth_routes
 from app.database.database import create_tables
@@ -47,6 +47,9 @@ app.include_router(tts_simple.router, prefix="/api/tts", tags=["text-to-speech"]
 
 # OCR routes
 app.include_router(ocr.router, prefix="/api/ocr", tags=["ocr"])
+
+# Summary routes
+app.include_router(summary.router, prefix="/api/summary", tags=["summary"])
 
 @app.get("/")
 async def root():

@@ -1,14 +1,44 @@
 from fastapi import APIRouter
 from app.models.predictions import ADHDInput, ADHDResult
 from app.services.ml_service import ml_service
+from pydantic import BaseModel
+from typing import List
 
 router = APIRouter()
 
+class SimpleADHDInput(BaseModel):
+    answers: List[int]
+
 @router.post("/predict", response_model=ADHDResult)
-async def predict_adhd(input_data: ADHDInput):
+async def predict_adhd(input_data: SimpleADHDInput):
     """Predict ADHD type based on questionnaire responses"""
-    result = ml_service.predict_adhd(input_data.q1_responses, input_data.q2_responses)
-    return ADHDResult(**result)
+    # Split answers into hyperactivity (first 9) and inattention (last 9)
+    hyperactivity_score = sum(input_data.answers[:9]) / 27  # Max 27 (9*3)
+    inattention_score = sum(input_data.answers[9:]) / 27
+    
+    if hyperactivity_score > 0.6 and inattention_score > 0.6:
+        adhd_type = "combined"
+        preset = 0
+    elif hyperactivity_score > 0.6:
+        adhd_type = "hyperactive"
+        preset = 1
+    elif inattention_score > 0.6:
+        adhd_type = "inattentive"
+        preset = 2
+    else:
+        adhd_type = "normal"
+        preset = 3
+    
+    return ADHDResult(
+        type=adhd_type,
+        confidence=max(hyperactivity_score, inattention_score),
+        preset=preset,
+        recommendations=[
+            "Use text chunking" if adhd_type != "normal" else "Continue regular reading",
+            "Enable word highlighting" if adhd_type in ["inattentive", "combined"] else "Standard formatting",
+            "Use TL;DR summaries" if adhd_type in ["hyperactive", "combined"] else "Full text reading"
+        ]
+    )
 
 @router.get("/questionnaire")
 async def get_adhd_questionnaire():
